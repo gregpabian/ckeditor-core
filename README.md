@@ -1,7 +1,7 @@
-Boilerplate for New Repositories
-================================
+#ckeditor-core
 
-The boilerplate used when creating the directory structure for new projects. It 
-contains most of the files we expect to have inside CKEditor 5 repositories.
+Part of the CKEditor 5 prototype.
 
-Note that all projects must have a README.md file, which replaces this one.
+This is a research place so no production code should be available here.
+
+Copyright &copy; CKSource - Frederico Knabben.
