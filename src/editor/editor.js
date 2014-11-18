@@ -70,7 +70,7 @@ CKEDITOR.define( [
 
 			// TODO this requires adding each plugin to the dependency list in ckeditor.js file,
 			// maybe we should re-think this one?
-			var plugin = require( 'plugins!' + name );
+			var plugin = this._plugins[ name ] = require( 'plugins!' + name );
 
 			if ( !plugin.name ) {
 				plugin.name = name;
