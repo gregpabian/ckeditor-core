@@ -2,7 +2,7 @@ CKEDITOR.define( function() {
 	'use strict';
 
 	var CommandsMixin = {
-		command: function( name, cmd, ctx ) {
+		addCommand: function( name, cmd, ctx ) {
 			if ( !this._commands ) {
 				Object.defineProperty( this, '_commands', {
 					value: {}

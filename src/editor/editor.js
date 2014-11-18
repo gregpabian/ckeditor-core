@@ -11,7 +11,8 @@ CKEDITOR.define( [
 
 	function Editor( src, options ) {
 		options = options || {};
-		options.src = new Element( src );
+		this.src = src;
+		this.$src = new Element( src );
 
 		MVC.Application.call( this, options );
 	}
@@ -20,22 +21,84 @@ CKEDITOR.define( [
 
 	utils.extend( Editor.prototype, {
 		addCreator: function( name, createFunction ) {
-			// TODO
+			if ( !this._creators ) {
+				Object.defineProperty( this, '_creators', {
+					value: {}
+				} );
+			}
+
+			this._creators[ name ] = createFunction;
 		},
 
 		getCreator: function( name ) {
-			// TODO
+			var creator = null;
+
+			// has creators
+			if ( this._creators && Object.keys( this._creators ).length ) {
+				// use selected creator
+				if ( name in this._creators ) {
+					creator = this._creators[ name ];
+					// use the first available creator
+				} else {
+					creator = this._creators[ Object.keys( this._creators )[ 0 ] ];
+				}
+			}
+
+			return creator;
 		},
 
 		initialize: function( options ) {
-			// TODO initialize plugins
+			this._initPlugins( options.plugins );
+
+			this.trigger( 'before:create' );
 
 			var creator = this.getCreator( options.creator );
+
 			if ( creator ) {
-				creator( this, options.src );
+				creator( this );
 			}
+			this.trigger( 'create' );
 
 			return this;
+		},
+
+		_initPlugin: function( name ) {
+			// don't add the same plugin twice
+			if ( this._plugins[ name ] ) {
+				return;
+			}
+
+			// TODO this requires adding each plugin to the dependency list in ckeditor.js file,
+			// maybe we should re-think this one?
+			var plugin = require( 'plugins!' + name );
+
+			if ( !plugin.name ) {
+				plugin.name = name;
+			}
+
+			if ( plugin.deps ) {
+				plugin.deps.forEach( this._initPlugin, this );
+			}
+
+			plugin.init( this );
+		},
+
+		_initPlugins: function( plugins ) {
+			if ( !plugins ) {
+				return;
+			}
+
+			if ( !this._plugins ) {
+				Object.defineProperty( this, '_plugins', {
+					value: {}
+				} );
+			}
+
+			if ( utils.isString( plugins ) ) {
+				plugins = plugins.split( ',' );
+			}
+
+			plugins.forEach( this._initPlugin, this );
 		}
 	} );
 

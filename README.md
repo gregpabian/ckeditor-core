@@ -1,4 +1,4 @@
-#ckeditor-core
+# ckeditor-core
 
 Part of the CKEditor 5 prototype.
 

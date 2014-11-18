@@ -7,10 +7,37 @@ CKEDITOR.define( [
 ) {
 	'use strict';
 
-	var ckeditor = {};
+	var ckeditor = {},
+		basePathSrcPattern = /(^|.*[\\\/])ckeditor\.js(?:\?.*|;.*)?$/i;
 
 	ckeditor.instances = {};
 
+	// CKEditor base path, based on CKE4 code
+	ckeditor.basePath = ( function() {
+		var scripts = document.getElementsByTagName( 'script' ),
+			path;
+
+		[].some.call( scripts, function( script ) {
+			var match = script.src.match( basePathSrcPattern );
+
+			if ( match ) {
+				path = match[ 1 ];
+				return true;
+			}
+		} );
+
+		if ( path.indexOf( ':/' ) == -1 && path.slice( 0, 2 ) != '//' ) {
+			if ( path.indexOf( '/' ) === 0 ) {
+				path = location.href.match( /^.*?:\/\/[^\/]*/ )[ 0 ] + path;
+			} else {
+				path = location.href.match( /^[^\?]*\/(?:)/ )[ 0 ] + path;
+			}
+		}
+
+		return path;
+	} )();
+
+	// create an editor instance
 	ckeditor.create = function( selector, options ) {
 		var editor = null,
 			element;
