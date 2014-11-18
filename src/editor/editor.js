@@ -1,9 +1,9 @@
 CKEDITOR.define( [
-	'mvc',
+	'mvc/application',
 	'tools/element',
 	'tools/utils'
 ], function(
-	MVC,
+	Application,
 	Element,
 	utils
 ) {
@@ -14,10 +14,10 @@ CKEDITOR.define( [
 		this.src = src;
 		this.$src = new Element( src );
 
-		MVC.Application.call( this, options );
+		Application.call( this, options );
 	}
 
-	utils.inherit( Editor, MVC.Application );
+	utils.inherit( Editor, Application );
 
 	utils.extend( Editor.prototype, {
 		addCreator: function( name, createFunction ) {
