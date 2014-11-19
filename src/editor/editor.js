@@ -1,11 +1,13 @@
 CKEDITOR.define( [
 	'mvc/application',
 	'tools/element',
-	'tools/utils'
+	'tools/utils',
+	'require'
 ], function(
 	Application,
 	Element,
-	utils
+	utils,
+	require
 ) {
 	'use strict';
 
@@ -66,7 +68,8 @@ CKEDITOR.define( [
 		},
 
 		_initPlugins: function( plugins, done ) {
-			var that = this;
+			var fnParamPattern = /\(([^\)]+)/,
+				that = this;
 
 			if ( !plugins ) {
 				return;
@@ -82,8 +85,6 @@ CKEDITOR.define( [
 				plugins = plugins.split( ',' );
 			}
 
-			var fnParamPattern = /\(([^\)]+)/;
-
 			function countParam( fn ) {
 				var params = fnParamPattern.exec( fn.toString() );
 
@@ -93,15 +94,19 @@ CKEDITOR.define( [
 			}
 
 			function next() {
-				var name = plugins.shift();
+				var data = plugins.shift();
 
-				if ( !name ) {
+				if ( !data ) {
 					return done();
 				}
 
-				require( [ 'plugins!' + name ], function( plugin ) {
-					that._plugins[ name ] = plugin;
+				if ( utils.isString( data ) ) {
+					data = {
+						name: data
+					};
+				}
 
+				CKEDITOR.require( [ 'plugins!' + data.name ], function( plugin ) {
 					function loaded() {
 						if ( countParam( plugin.init ) > 1 ) {
 							plugin.init( that, next );
@@ -111,6 +116,24 @@ CKEDITOR.define( [
 						}
 					}
 
+					// don't re-initialize
+					if ( that._plugins[ data.name ] ) {
+						return next();
+					}
+
+					that._plugins[ data.name ] = plugin;
+
+					// inject plugin's name
+					if ( !plugin.name ) {
+						plugin.name = data.name;
+					}
+
+					// inject plugin's path
+					if ( !plugin.path ) {
+						plugin.path = data.path || CKEDITOR.getPluginPath( data.name );
+					}
+
+					// load and initialize plugin's dependencies
 					if ( plugin.deps ) {
 						that._initPlugins( utils.clone( plugin.deps ), loaded );
 					} else {
