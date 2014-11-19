@@ -1,4 +1,4 @@
-CKEDITOR.define( [
+CKE.define( [
 	'mvc/application',
 	'tools/element',
 	'tools/utils',
@@ -108,7 +108,7 @@ CKEDITOR.define( [
 					};
 				}
 
-				CKEDITOR.require( [ 'plugins!' + data.name ], function( plugin ) {
+				CKE.require( [ 'plugins!' + data.name ], function( plugin ) {
 					function loaded() {
 						// if "plugin.init" requires more than one parameter, it means the "init"
 						// function might be asynchronous and want's to trigger "done" callback
@@ -134,7 +134,7 @@ CKEDITOR.define( [
 
 					// inject plugin's path
 					if ( !plugin.path ) {
-						plugin.path = data.path || CKEDITOR.getPluginPath( data.name );
+						plugin.path = data.path || CKE.getPluginPath( data.name );
 					}
 
 					// load and initialize plugin's dependencies

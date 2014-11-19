@@ -1,4 +1,4 @@
-CKEDITOR.define( function() {
+CKE.define( function() {
 	'use strict';
 
 	var CommandsMixin = {

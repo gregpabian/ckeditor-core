@@ -1,4 +1,4 @@
-CKEDITOR.define( [
+CKE.define( [
 	'editor/editor',
 	'tools/emitter',
 	'tools/utils'

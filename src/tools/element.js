@@ -1,4 +1,4 @@
-CKEDITOR.define( [
+CKE.define( [
 	'tools/utils'
 ], function(
 	utils

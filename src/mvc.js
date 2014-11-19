@@ -1,4 +1,4 @@
-CKEDITOR.define( [
+CKE.define( [
 	'mvc/application',
 	'mvc/model',
 	'mvc/space',
