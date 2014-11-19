@@ -56,6 +56,7 @@ CKEDITOR.define( [
 			this._initPlugins( options.plugins, function() {
 				var creator = this.getCreator( options.creator );
 
+				// create a UI for this Editor instance
 				if ( creator ) {
 					creator( this );
 				}
@@ -85,6 +86,7 @@ CKEDITOR.define( [
 				plugins = plugins.split( ',' );
 			}
 
+			// counts a number of parameters expected by a plugin's "init" function.
 			function countParam( fn ) {
 				var params = fnParamPattern.exec( fn.toString() );
 
@@ -108,6 +110,8 @@ CKEDITOR.define( [
 
 				CKEDITOR.require( [ 'plugins!' + data.name ], function( plugin ) {
 					function loaded() {
+						// if "plugin.init" requires more than one parameter, it means the "init"
+						// function might be asynchronous and want's to trigger "done" callback
 						if ( countParam( plugin.init ) > 1 ) {
 							plugin.init( that, next );
 						} else {
