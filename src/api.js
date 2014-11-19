@@ -12,6 +12,7 @@ CKEDITOR.define( [
 	var basePathSrcPattern = /(^|.*[\\\/])ckeditor\.js(?:\?.*|;.*)?$/i,
 		ckeditor = utils.extend( {}, Emitter );
 
+	// holds references to all Editor instances
 	ckeditor.instances = {};
 
 	// CKEditor base path, based on CKE4 code
@@ -61,6 +62,11 @@ CKEDITOR.define( [
 		this.trigger( 'instance:create', editor );
 
 		return editor;
+	};
+
+	// build a full path to a plugin's resource directory
+	ckeditor.getPluginPath = function( name ) {
+		return ckeditor.basePath + 'plugins/' + name + '/';
 	};
 
 	return ckeditor;
