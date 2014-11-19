@@ -58,7 +58,7 @@ CKE.define( [
 
 				// create a UI for this Editor instance
 				if ( creator ) {
-					creator( this );
+					creator.create();
 				}
 
 				this.isCreated = true;
@@ -69,7 +69,7 @@ CKE.define( [
 		},
 
 		_initPlugins: function( plugins, done ) {
-			var fnParamPattern = /\(([^\)]+)/,
+			var fnParamPattern = /\(([^\)]*)/,
 				that = this;
 
 			if ( !plugins ) {
@@ -87,12 +87,10 @@ CKE.define( [
 			}
 
 			// counts a number of parameters expected by a plugin's "init" function.
-			function countParam( fn ) {
+			function needsParams( fn ) {
 				var params = fnParamPattern.exec( fn.toString() );
 
-				params = params[ 1 ] ? params[ 1 ].replace( /\s*/g, '' ).split( ',' ).length : 0;
-
-				return params;
+				return params && !!params[1];
 			}
 
 			function next() {
@@ -108,14 +106,16 @@ CKE.define( [
 					};
 				}
 
-				CKE.require( [ 'plugins!' + data.name ], function( plugin ) {
+				CKE.require( [ 'plugins!' + data.name ], function( Plugin ) {
+					var plugin;
+
 					function loaded() {
-						// if "plugin.init" requires more than one parameter, it means the "init"
+						// if "plugin.init" requires a parameter, it means the "init"
 						// function might be asynchronous and want's to trigger "done" callback
-						if ( countParam( plugin.init ) > 1 ) {
-							plugin.init( that, next );
+						if ( needsParams( plugin.init ) ) {
+							plugin.init.call( plugin, next );
 						} else {
-							plugin.init( that );
+							plugin.init.call( plugin );
 							next();
 						}
 					}
@@ -125,7 +125,7 @@ CKE.define( [
 						return next();
 					}
 
-					that._plugins[ data.name ] = plugin;
+					that._plugins[ data.name ] = plugin = new Plugin( that );
 
 					// inject plugin's name
 					if ( !plugin.name ) {
