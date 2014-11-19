@@ -1,14 +1,16 @@
 CKEDITOR.define( [
 	'editor/editor',
+	'tools/emitter',
 	'tools/utils'
 ], function(
 	Editor,
+	Emitter,
 	utils
 ) {
 	'use strict';
 
-	var ckeditor = {},
-		basePathSrcPattern = /(^|.*[\\\/])ckeditor\.js(?:\?.*|;.*)?$/i;
+	var basePathSrcPattern = /(^|.*[\\\/])ckeditor\.js(?:\?.*|;.*)?$/i,
+		ckeditor = utils.extend( {}, Emitter );
 
 	ckeditor.instances = {};
 
@@ -55,6 +57,8 @@ CKEDITOR.define( [
 				editor = ckeditor.instances[ 'editor_' + utils.uid( 'e' ) ] = new Editor( element[ 0 ], options );
 			}
 		}
+
+		this.trigger( 'instance:create', editor );
 
 		return editor;
 	};
