@@ -13,6 +13,7 @@ CKEDITOR.define( [
 		options = options || {};
 		this.src = src;
 		this.$src = new Element( src );
+		this.isCreated = false;
 
 		Application.call( this, options );
 	}
@@ -48,42 +49,25 @@ CKEDITOR.define( [
 		},
 
 		initialize: function( options ) {
-			this._initPlugins( options.plugins );
+			this.trigger( 'before:create', this );
 
-			this.trigger( 'before:create' );
+			this._initPlugins( options.plugins, function() {
+				var creator = this.getCreator( options.creator );
 
-			var creator = this.getCreator( options.creator );
+				if ( creator ) {
+					creator( this );
+				}
 
-			if ( creator ) {
-				creator( this );
-			}
-			this.trigger( 'create' );
+				this.isCreated = true;
+				this.trigger( 'create', this );
+			}.bind( this ) );
 
 			return this;
 		},
 
-		_initPlugin: function( name ) {
-			// don't add the same plugin twice
-			if ( this._plugins[ name ] ) {
-				return;
-			}
+		_initPlugins: function( plugins, done ) {
+			var that = this;
 
-			// TODO this requires adding each plugin to the dependency list in ckeditor.js file,
-			// maybe we should re-think this one?
-			var plugin = this._plugins[ name ] = require( 'plugins!' + name );
-
-			if ( !plugin.name ) {
-				plugin.name = name;
-			}
-
-			if ( plugin.deps ) {
-				plugin.deps.forEach( this._initPlugin, this );
-			}
-
-			plugin.init( this );
-		},
-
-		_initPlugins: function( plugins ) {
 			if ( !plugins ) {
 				return;
 			}
@@ -98,7 +82,44 @@ CKEDITOR.define( [
 				plugins = plugins.split( ',' );
 			}
 
-			plugins.forEach( this._initPlugin, this );
+			var fnParamPattern = /\(([^\)]+)/;
+
+			function countParam( fn ) {
+				var params = fnParamPattern.exec( fn.toString() );
+
+				params = params[ 1 ] ? params[ 1 ].replace( /\s*/g, '' ).split( ',' ).length : 0;
+
+				return params;
+			}
+
+			function next() {
+				var name = plugins.shift();
+
+				if ( !name ) {
+					return done();
+				}
+
+				require( [ 'plugins!' + name ], function( plugin ) {
+					that._plugins[ name ] = plugin;
+
+					function loaded() {
+						if ( countParam( plugin.init ) > 1 ) {
+							plugin.init( that, next );
+						} else {
+							plugin.init( that );
+							next();
+						}
+					}
+
+					if ( plugin.deps ) {
+						that._initPlugins( utils.clone( plugin.deps ), loaded );
+					} else {
+						loaded();
+					}
+				} );
+			}
+
+			next();
 		}
 	} );
 
