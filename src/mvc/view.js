@@ -41,13 +41,13 @@ define( [
 		template: null,
 
 		destroy: function() {
-			if ( this.isDestroyed ) {
+			if ( this.destroyed ) {
 				return this;
 			}
 
 			this.trigger( 'before:destroy', this );
 
-			this.isDestroyed = true;
+			this.destroyed = true;
 			this.el.remove();
 			this.stopListening();
 
@@ -66,7 +66,7 @@ define( [
 
 			this.trigger( 'render', this );
 
-			this.isDestroyed = false;
+			this.destroyed = false;
 
 			return this;
 		}

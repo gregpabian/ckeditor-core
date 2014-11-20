@@ -15,7 +15,7 @@ CKE.define( [
 		options = options || {};
 		this.src = src;
 		this.$src = new Element( src );
-		this.isCreated = false;
+		this.created = false;
 
 		Application.call( this, options );
 	}
@@ -61,7 +61,7 @@ CKE.define( [
 					creator.create();
 				}
 
-				this.isCreated = true;
+				this.created = true;
 				this.trigger( 'create', this );
 			}.bind( this ) );
 
