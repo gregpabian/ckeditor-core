@@ -90,7 +90,7 @@ CKE.define( [
 			function needsParams( fn ) {
 				var params = fnParamPattern.exec( fn.toString() );
 
-				return params && !!params[1];
+				return params && !!params[ 1 ];
 			}
 
 			function next() {
@@ -102,14 +102,20 @@ CKE.define( [
 
 				if ( utils.isString( data ) ) {
 					data = {
-						name: data
+						name: data.replace( 'plugins!', '' )
 					};
 				}
 
-				CKE.require( [ 'plugins!' + data.name ], function( Plugin ) {
+				var name = 'plugins!' + data.name;
+
+				CKE.require( [ name ], function( Plugin ) {
 					var plugin;
 
 					function loaded() {
+						if ( !plugin || !plugin.init ) {
+							return next();
+						}
+
 						// if "plugin.init" requires a parameter, it means the "init"
 						// function might be asynchronous and want's to trigger "done" callback
 						if ( needsParams( plugin.init ) ) {
@@ -137,9 +143,17 @@ CKE.define( [
 						plugin.path = data.path || CKE.getPluginPath( data.name );
 					}
 
+					// get plugin's dependenceis
+					var deps = CKE._dependencyTree[ name ] || [];
+
+					// pick only dependencies that are other plugins
+					deps = deps.filter( function( dep ) {
+						return dep.indexOf( 'plugins!' ) === 0;
+					} );
+
 					// load and initialize plugin's dependencies
-					if ( plugin.deps ) {
-						that._initPlugins( utils.clone( plugin.deps ), loaded );
+					if ( deps.length ) {
+						that._initPlugins( deps, loaded );
 					} else {
 						loaded();
 					}
